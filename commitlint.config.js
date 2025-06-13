@@ -7,20 +7,13 @@ module.exports = {
     'type-enum': [
       2,
       'always',
-      [
-        'feat',
-        'fix',
-        'docs',
-        'style',
-        'refactor',
-        'test',
-        'build',
-        'perf',
-        'release',
-        'chore',
-        'revert',
-      ],
+      ['feat', 'fix', 'docs', 'refactor', 'test', 'build', 'perf', 'release', 'chore', 'revert'],
     ],
     'references-empty': [2, 'never'],
+  },
+  parserPreset: {
+    parserOpts: {
+      issuePrefixes: ['#'],
+    },
   },
 };
