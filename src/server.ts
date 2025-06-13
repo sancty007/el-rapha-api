@@ -1,14 +1,38 @@
-import express, { Request, Response } from 'express';
+import app from './app';
 import config from './config';
 
-const app = express();
+const PORT = config.PORT || 3000;
 
-app.use(express.json());
-
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello, World!');
+const server = app.listen(PORT, async () => {
+  try {
+    // Établir la connexion à la base de données
+    console.info(`🚀 Server is running on port ${PORT}`);
+    console.info(`🌐 API available at http://localhost:${PORT}`);
+    console.info(`🌱 Environment: ${config.NODE_ENV}`);
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
 });
 
-app.listen(config.PORT, () => {
-  console.log(`Server is running on port ${config.PORT} in ${config.NODE_ENV} mode`);
+// Handle promesse rejection in our application
+
+process.on('unhandledRejection', (err: Error) => {
+  console.log('UNCAUGHT REJECTION !!');
+  console.log(err.name, err.message);
+  server.close(() => {
+    console.log('server are closed');
+    process.exit(1);
+  });
+});
+
+// Handle exceptions
+
+process.on('uncaughtException', (err: Error) => {
+  console.log('UNCAUGHT EXCEPTION !!');
+  console.log(err.name, err.message);
+  server.close(() => {
+    console.log('server are closed');
+    process.exit(1);
+  });
 });
