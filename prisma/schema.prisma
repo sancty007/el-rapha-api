@@ -1,0 +1,264 @@
+
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  roleId    Int      @map("role_id")
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user_role      UserRole  @default(ADMIN)
+  practitioners Practitioner[]
+
+  @@map("users")
+}
+
+model Patient {
+  id          String   @id @default(uuid()) @db.Uuid
+  fullName    String   @map("full_name")
+  phoneNumber String   @map("phone_number")
+  email       String?
+  birthDate   DateTime @map("birth_date") @db.Date
+  gender      Gender
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  appointments Appointment[]
+
+  @@map("patients")
+}
+
+
+
+model Practitioner {
+  id          String   @id @default(uuid()) @db.Uuid
+  fullName    String   @map("full_name")
+  email       String   @unique
+  specialtyId String   @map("specialty_id") @db.Uuid
+  userId      Int   @map("user_id") 
+  schedule    Json?    
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  specialty    Specialty     @relation(fields: [specialtyId], references: [id])
+  user    User     @relation(fields: [userId], references: [id])
+
+  appointments Appointment[]
+
+  @@map("practitioners")
+}
+
+model Specialty {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  practitioners Practitioner[]
+
+  @@map("specialties")
+}
+
+model Room {
+  id         String   @id @default(uuid()) @db.Uuid
+  roomNumber String   @unique @map("room_number")
+  available  Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  appointments Appointment[]
+
+  @@map("rooms")
+}
+
+model Appointment {
+  id              String            @id @default(uuid()) @db.Uuid
+  patientId       String            @map("patient_id") @db.Uuid
+  practitionerId  String            @map("practitioner_id") @db.Uuid
+  roomId          String?           @map("room_id") @db.Uuid
+  guichetId       String?           @map("guichet_id") @db.Uuid
+  checkInId       String             @map("checkIn_id") @db.Uuid
+  agentId         String?           @map("agent_id") @db.Uuid   
+  appointmentDate DateTime          @map("appointment_date") @db.Date
+  startTime       DateTime          @map("start_time") @db.Time
+  status          AppointmentStatus @default(BOOKED)
+  channel         BookingChannel
+  qrCode          String?           @unique @map("qr_code") 
+  notes           String?
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  
+
+  patient      Patient       @relation(fields: [patientId], references: [id])
+  practitioner Practitioner  @relation(fields: [practitionerId], references: [id])
+  room         Room?         @relation(fields: [roomId], references: [id])
+  guichet      Guichet?      @relation(fields: [guichetId], references: [id])
+  agent        Agent?        @relation(fields: [agentId], references: [id])
+  queueEntry   QueueEntry?
+
+  checkIns       CheckIn[]     
+  
+  @@map("appointments")
+}
+model QueueEntry {
+  id             String      @id @default(uuid()) @db.Uuid
+  appointmentId  String      @unique @map("appointment_id") @db.Uuid
+  checkInTime    DateTime    @map("check_in_time")
+  status         QueueStatus @default(WAITING)
+  estimatedWait  Int?        @map("estimated_wait") 
+  position       Int?      
+  priority       Int         @default(0) 
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+
+  @@map("queue_entries")
+}
+
+model Guichet {
+  id          String   @id @default(uuid()) @db.Uuid
+  nom         String   @unique 
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  location    String? 
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  agents       Agent[]       
+  checkIns     CheckIn[]     
+  appointments Appointment[] 
+  
+  @@map("guichets")
+}
+
+model Agent {
+  id         String    @id @default(uuid()) @db.Uuid
+  fullName   String    @map("full_name")
+  email      String    @unique
+  phone      String?
+  guichetId  String?   @map("guichet_id") @db.Uuid
+  isActive   Boolean   @default(true) @map("is_active")  
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  
+  guichet      Guichet?     @relation(fields: [guichetId], references: [id])
+  checkIns     CheckIn[]    
+  appointments Appointment[] 
+
+  @@map("agents")
+}
+
+
+model CheckIn {
+  id            String      @id @default(uuid()) @db.Uuid
+  appointmentId String      @map("appointment_id") @db.Uuid
+  guichetId     String      @map("guichet_id") @db.Uuid
+  agentId       String      @map("agent_id") @db.Uuid
+  checkInTime   DateTime    @default(now()) @map("check_in_time")
+  status        CheckInStatus @default(COMPLETED)
+  notes         String?    
+  createdAt     DateTime    @default(now()) @map("created_at")
+  
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+  guichet     Guichet     @relation(fields: [guichetId], references: [id])
+  agent       Agent       @relation(fields: [agentId], references: [id])
+  
+  @@map("check_ins")
+}
+
+
+model Notification {
+  id        String             @id @default(uuid()) @db.Uuid
+  type      NotificationType
+  channel   NotificationChannel
+  recipient String             
+  message   String
+  status    NotificationStatus @default(PENDING)
+  sentAt    DateTime?          @map("sent_at")
+  createdAt DateTime           @default(now()) @map("created_at")
+  @@map("notifications")
+}
+
+
+enum Gender {
+  MALE
+  FEMALE
+
+  @@map("gender")
+}
+
+enum CheckInStatus {
+  COMPLETED         
+  CANCELLED     
+}
+
+enum AppointmentStatus {
+  BOOKED
+  CHECKED_IN
+  IN_CONSULTATION
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+  @@map("appointment_status")
+}
+
+enum BookingChannel {
+  WEB
+  WHATSAPP
+  DESK
+  @@map("booking_channel")
+}
+
+enum QueueStatus {
+  WAITING
+  IN_CONSULTATION
+  DONE
+  CANCELLED
+  @@map("queue_status")
+}
+
+enum UserRole {
+  PATIENT
+  AGENT
+  DOCTOR
+  ADMIN
+  @@map("user_role")
+}
+
+enum NotificationType {
+  APPOINTMENT_CONFIRMATION
+  APPOINTMENT_REMINDER
+  CHECK_IN_CONFIRMATION
+  QUEUE_UPDATE
+  APPOINTMENT_CANCELLED
+
+  @@map("notification_type")
+}
+
+enum NotificationChannel {
+  SMS
+  WHATSAPP
+  EMAIL
+  @@map("notification_channel")
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  @@map("notification_status")
+}
