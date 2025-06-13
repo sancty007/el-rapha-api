@@ -6,7 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/app.js",
     "dev": "nodemon src/server.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -51,6 +52,7 @@
     "http-status-codes": "^2.3.0",
     "husky": "^9.1.7",
     "jest": "^30.0.0",
+    "lint-staged": "^16.1.0",
     "nodemon": "^3.1.10",
     "prettier": "^3.5.3",
     "prisma": "^6.9.0",
