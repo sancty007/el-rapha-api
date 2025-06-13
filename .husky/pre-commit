@@ -1,0 +1,3 @@
+
+echo "Exécution de lint-staged..."
+npx --no-install lint-staged
