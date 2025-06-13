@@ -1,27 +1,23 @@
 import app from './app';
 import config from './config';
+import { logger } from './lib/winston';
 
 const PORT = config.PORT || 3000;
 
-const server = app.listen(PORT, async () => {
-  try {
-    // Établir la connexion à la base de données
-    console.info(`🚀 Server is running on port ${PORT}`);
-    console.info(`🌐 API available at http://localhost:${PORT}`);
-    console.info(`🌱 Environment: ${config.NODE_ENV}`);
-  } catch (error) {
-    console.error('❌ Failed to start server:', error);
-    process.exit(1);
-  }
+const server = app.listen(PORT, () => {
+  // Établir la connexion à la base de données
+  logger.info(`🚀 Server is running on port ${PORT}`);
+  logger.info(`🌐 API available at http://localhost:${PORT}`);
+  logger.info(`🌱 Environment: ${config.NODE_ENV}`);
 });
 
 // Handle promesse rejection in our application
 
 process.on('unhandledRejection', (err: Error) => {
-  console.log('UNCAUGHT REJECTION !!');
-  console.log(err.name, err.message);
+  logger.info('UNCAUGHT REJECTION !!');
+  logger.info(err.name, err.message);
   server.close(() => {
-    console.log('server are closed');
+    logger.info('server are closed');
     process.exit(1);
   });
 });
@@ -29,10 +25,10 @@ process.on('unhandledRejection', (err: Error) => {
 // Handle exceptions
 
 process.on('uncaughtException', (err: Error) => {
-  console.log('UNCAUGHT EXCEPTION !!');
-  console.log(err.name, err.message);
+  logger.info('UNCAUGHT EXCEPTION !!');
+  logger.info(err.name, err.message);
   server.close(() => {
-    console.log('server are closed');
+    logger.info('server are closed');
     process.exit(1);
   });
 });

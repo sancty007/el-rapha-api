@@ -1,7 +1,6 @@
-import express, { NextFunction, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import helmet from 'helmet';
 import config from './config';
-import { logger } from './lib/winston';
 import cors, { CorsOptions } from 'cors';
 import cookieParser from 'cookie-parser';
 
@@ -26,20 +25,9 @@ app.use(helmet());
 
 app.use(express.json());
 
-app.get(`/api/v1/test`, (req: Request, res: Response) => {
+app.get('/api/v1/test', (req: Request, res: Response) => {
   res.status(200).json({
-    status: 'success',
-    message: 'API is healthy and running!',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(), // Temps de fonctionnement du processus en secondes
-  });
-});
-
-app.all('*', (req: Request, res: Response, next: NextFunction) => {
-  logger.info(`Unhandled request: ${req.method} ${req.originalUrl}`);
-  res.status(404).json({
-    status: 'fail',
-    message: `Cannot ${req.method} ${req.originalUrl}`,
+    message: 'Hello World!',
   });
 });
 
