@@ -3,4 +3,8 @@ node_modules/
 
 # env
 .env
+#prisma
 /src/generated/prisma
+
+# build
+dist/
