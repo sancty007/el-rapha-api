@@ -3,10 +3,9 @@ import helmet from 'helmet';
 import config from './config';
 import cors, { CorsOptions } from 'cors';
 import cookieParser from 'cookie-parser';
+import router from './features/auth/auth.route';
 
 const app = express();
-
-// cors option config
 const corsOptions: CorsOptions = {
   origin(origin, callback) {
     if (config.NODE_ENV === 'development' || !origin || config.WHITELIST_ORIGIN.includes(origin)) {
@@ -17,17 +16,19 @@ const corsOptions: CorsOptions = {
     }
   },
 };
-
-app.use(cors(corsOptions));
+app.use(cookieParser());
+app.use(helmet());
+app.use(express.json());
 app.use(cookieParser());
 
-app.use(helmet());
+app.use('/api/v1/auth', router);
 
-app.use(express.json());
+app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
+  logger.error(err.message);
+  res.status(500).json({
+    status: 'error',
+    message: err.message,
 
-app.get('/api/v1/test', (req: Request, res: Response) => {
-  res.status(200).json({
-    message: 'Hello World!',
   });
 });
 
