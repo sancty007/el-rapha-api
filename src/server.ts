@@ -5,7 +5,6 @@ const PORT = config.PORT || 3000;
 
 const server = app.listen(PORT, async () => {
   try {
-    // Établir la connexion à la base de données
     console.info(`🚀 Server is running on port ${PORT}`);
     console.info(`🌐 API available at http://localhost:${PORT}`);
     console.info(`🌱 Environment: ${config.NODE_ENV}`);
@@ -15,8 +14,6 @@ const server = app.listen(PORT, async () => {
   }
 });
 
-// Handle promesse rejection in our application
-
 process.on('unhandledRejection', (err: Error) => {
   console.log('UNCAUGHT REJECTION !!');
   console.log(err.name, err.message);
@@ -25,8 +22,6 @@ process.on('unhandledRejection', (err: Error) => {
     process.exit(1);
   });
 });
-
-// Handle exceptions
 
 process.on('uncaughtException', (err: Error) => {
   console.log('UNCAUGHT EXCEPTION !!');

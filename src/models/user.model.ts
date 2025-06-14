@@ -1,8 +1,9 @@
 export interface User {
-  id: string;
+  id: number;
   email: string;
-  name?: string;
-  role: string;
+  name?: string | null;
+  roleId: number;
+  password: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,7 +25,7 @@ export interface AuthResponse {
 }
 
 export interface JWTPayload {
-  userId: string;
+  userId: number;
   iat?: number;
   exp?: number;
 }

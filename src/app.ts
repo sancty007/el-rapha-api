@@ -4,42 +4,44 @@ import config from './config';
 import { logger } from './lib/winston';
 import cors, { CorsOptions } from 'cors';
 import cookieParser from 'cookie-parser';
+import router from './features/auth/auth.route';
 
 const app = express();
-
-// cors option config
 const corsOptions: CorsOptions = {
-  origin(origin, callback) {
-    if (config.NODE_ENV === 'development' || !origin || config.WHITELIST_ORIGIN.includes(origin)) {
+  origin(
+    origin: string | undefined | null,
+    callback: (err: Error | null, allow?: boolean) => void,
+  ) {
+    const allowedOrigins = ['http://localhost:3000'];
+
+    if (config.NODE_ENV === 'development' || !origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error(`CORS Error:${origin} is not allowed by cors`), false);
-      console.log(`CORS Error:${origin} is not allowed by cors`);
+      const errorMsg = `CORS Error: ${origin} is not allowed by CORS`;
+      logger.error(errorMsg);
+      callback(new Error(errorMsg), false);
     }
   },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  credentials: true,
+  maxAge: 86400,
 };
 
+// Apply CORS middleware
 app.use(cors(corsOptions));
 app.use(cookieParser());
-
 app.use(helmet());
-
 app.use(express.json());
+app.use(cookieParser());
 
-app.get(`/api/v1/test`, (req: Request, res: Response) => {
-  res.status(200).json({
-    status: 'success',
-    message: 'API is healthy and running!',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(), // Temps de fonctionnement du processus en secondes
-  });
-});
+app.use('/api/v1/auth', router);
 
-app.all('*', (req: Request, res: Response, next: NextFunction) => {
-  logger.info(`Unhandled request: ${req.method} ${req.originalUrl}`);
-  res.status(404).json({
-    status: 'fail',
-    message: `Cannot ${req.method} ${req.originalUrl}`,
+app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
+  logger.error(err.message);
+  res.status(500).json({
+    status: 'error',
+    message: err.message,
   });
 });
 

@@ -12,7 +12,15 @@ export class AuthController {
       }
 
       const result = await AuthService.register({ email, password, name });
-      res.status(201).json(result);
+
+      res.cookie('authToken', result.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 86400000,
+      });
+
+      res.status(201).json({ user: result.user });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
@@ -28,7 +36,15 @@ export class AuthController {
       }
 
       const result = await AuthService.login({ email, password });
-      res.json(result);
+
+      // Store the JWT token in a cookie
+      res.cookie('authToken', result.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 86400000,
+      });
+      res.json({ user: result.user });
     } catch (error: any) {
       res.status(401).json({ error: error.message });
     }

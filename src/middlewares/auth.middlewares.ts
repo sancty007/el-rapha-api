@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyToken } from '../core/utils/auth';
+import { verifyToken } from '../lib/auth';
 import { AuthService } from '../core/auth/auth.service';
 import { User } from '../models/user.model';
 
@@ -39,6 +39,7 @@ export const authenticateToken = async (
     }
 
     req.user = user;
+
     next();
   } catch (error) {
     res.status(500).json({ error: 'Server error' });

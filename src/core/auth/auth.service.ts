@@ -1,5 +1,5 @@
 import { CreateUserData, LoginData, AuthResponse } from '../../models/user.model';
-import { registerUser, loginUser } from '../utils/auth';
+import { loginUser, registerUser } from '../../lib/auth';
 import prisma from '../database/prisma';
 
 export class AuthService {
@@ -19,14 +19,14 @@ export class AuthService {
     return await loginUser(loginData);
   }
 
-  static async getUserById(userId: string) {
+  static async getUserById(userId: number) {
     return await prisma.user.findUnique({
       where: { id: userId },
       select: {
         id: true,
         email: true,
         name: true,
-        role: true,
+        roleId: true,
         createdAt: true,
         updatedAt: true,
       },
