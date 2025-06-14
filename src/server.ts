@@ -14,21 +14,21 @@ const server = app.listen(PORT, async () => {
     process.exit(1);
   }
 
-
-process.on('unhandledRejection', (err: Error) => {
-  logger.info('UNCAUGHT REJECTION !!');
-  logger.info(err.name, err.message);
-  server.close(() => {
-    logger.info('server are closed');
-    process.exit(1);
+  process.on('unhandledRejection', (err: Error) => {
+    logger.info('UNCAUGHT REJECTION !!');
+    logger.info(err.name, err.message);
+    server.close(() => {
+      logger.info('server are closed');
+      process.exit(1);
+    });
   });
-});
 
-process.on('uncaughtException', (err: Error) => {
-  logger.info('UNCAUGHT EXCEPTION !!');
-  logger.info(err.name, err.message);
-  server.close(() => {
-    logger.info('server are closed');
-    process.exit(1);
+  process.on('uncaughtException', (err: Error) => {
+    logger.info('UNCAUGHT EXCEPTION !!');
+    logger.info(err.name, err.message);
+    server.close(() => {
+      logger.info('server are closed');
+      process.exit(1);
+    });
   });
 });

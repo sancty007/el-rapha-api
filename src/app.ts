@@ -1,9 +1,10 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import config from './config';
 import cors, { CorsOptions } from 'cors';
 import cookieParser from 'cookie-parser';
 import router from './features/auth/auth.route';
+import { logger } from './lib/winston';
 
 const app = express();
 const corsOptions: CorsOptions = {
@@ -28,7 +29,6 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
   res.status(500).json({
     status: 'error',
     message: err.message,
-
   });
 });
 
